@@ -1,111 +1,138 @@
 import pandas as pd
 import warnings
 warnings.filterwarnings("ignore")
-#Task1
-#Loading the data
-def read_data_from_csv():
-    #read the playstore_apps.csv dataset and return the data
-    df = pd.read_csv('playstore_apps.csv')
-    return df
 
+#do not change the predefined function names
 
-#Task2: Keep Only Required columns,
-def remove_unwanted_columns():
-    #do not remove this line and do not change the function names
-    df=read_data_from_csv()
-    #remove the unwanted column and use inplace= True for dynamically updating the dataset
-    # write your code here
-    # List of unwanted columns
-    unwanted_columns = ['Last Updated', 'Current Ver', 'Android Ver', 'Size']
-
-# Remove the unwanted columns
-    df.drop(unwanted_columns, axis=1, inplace=True)
-
-    return df
-
-
-#TASK3 : REMOVE DUPLICATES FROM THE DATASET
-def remove_duplicates():
-    # do not remove this line and do not change the function names
-    df=remove_unwanted_columns()
-    #write your code here
-    df.drop_duplicates(inplace=True)
-    return df
-
-
-#TASK4: HANDLE NULL VALUES IN THE DATASET
-def no_of_null_values():
-    df= remove_duplicates()
-    ##write your code here and return the null values
-    num_sum = df.isnull().sum()
-    return num_sum
-
-
-#TASK5: Replace the null values
-
-def replace_null_values():
-    df=remove_duplicates()
-
-    # write your code here
+#Task 1: Remove columns that are not needed in our analysis.
+# Remove Url_spotify, Uri, Key, Url_youtube, Description
+def Remove_columns():
+    #do not remove following line of code
+    df = pd.read_csv('Spotify_Youtuben.csv')
     
+    #WRITE YOUR CODE HERE
+    columns_to_remove = ["Url_spotify", "Uri", "Key", "Url_youtube",  "Description"]
+    df = df.drop(columns=columns_to_remove)
+    #return dataframe
     return df
 
 
-#TASK6: check unique values of Category column and remove irrelevant category
-def check_unique_values():
-    df= replace_null_values()
+#Task 2: Check for the null values
+def no_of_null_values():
+    #Do not remove the following code statment
+    
+    df=Remove_columns()
 
-    #write your code here
+
+    #WRITE YOUR CODE HERE TO CHECK THE NO OF NULL VALUES AND RETURNS THE SAME
+    num_sum = df.isnull().sum()
+    #return sum of null values by columns
+    return num_sum
+    
+
+#Task 3: Handle the null values replace int value with 0 and other values with NA
+def Handle_Null_values():
+    #Do not remove the following code statment
+    df=Remove_columns()
+    
+    #WRITE YOUR CODE HERE ACCORDING TO THE DESCRIPTION
+    df = df.fillna(value=0)
+    df = df.astype(object).fillna(value='NA')
+
+    #return dataframe
     return df
 
+#Task 4: CHECK FOR DUPLICATES AND REMOVE THEM KEEPING THE FIRST VALUE
+def drop_the_duplicates():
+    #Do not remove the following code statment
+    df=Handle_Null_values()
 
-
-#TASK7: Check unique values of "Type" column,
-def free_or_paid():
-    df= check_unique_values()
-    #write your code here
+    #WRITE YOUR CODE HERE
+    df = df.drop_duplicates()
+    #return dataframe
     return df
 
+#Task 5: CONVERT millisecond duration to minute for a better understanding
+def convert_milisecond_to_Minute():
+    #Do not remove the following code statment
+    df=drop_the_duplicates()
 
-
-
-# Task 8: Remove apps with irrelevant names. starting with '?'
-##export the cleaned dataset to new file as 'cleaned_apps_db.csv'
-def irrleveant_names():
-    df=free_or_paid()
-     #write your code here
-
-    df.to_csv('cleaned_apps_db.csv', index=False)
+    #WRITE YOUR CODE HERE
+    df["Duration_ms"] = df["Duration_ms"] / 60000
+    #return dataframe
     return df
 
+#Task 6: Rename the modified column to Duration_min
+def rename_modified_column():
+    #Do not remove the following code statment
+    df=convert_milisecond_to_Minute()
 
-#Task9: Remove rows with nan values in the  Reviews dataset
-#Read the playstore_reviews.csv file as df1 and return the same
+    #WRITE YOUR CODE HERE
+    df = df.rename(columns={"Duration_ms": "Duration_min"})
+    #return dataframe
+    return df
 
-def reviews_dataset():
-    #write your code here
+#Task 7: Remove irrelevant 'Track' name that starts with ?
+def Irrelevant_Track_name():
+    #Do not remove the following code statment
+    df=rename_modified_column()
 
-    return df1
+    #WRITE YOUR CODE HERE
+    df = df[~df['Track'].str.startswith('?')]
 
+    #return dataframe
+    return df
 
-#Task10: Remove identical rows from the dataset and upload the dataset to the database
-#export the cleaned dataset to new file as 'cleaned_reviews_db.csv'
-def remove_identical_rows():
-    df1 = reviews_dataset()
-    #write your code here
-    df1.to_csv('cleaned_reviews_db.csv', index=False)
-    return df1
+#Task 8: Calculate the Energy to Liveness ratio for each track and store it in columns 'EnergyLiveness'
+def Energy_to_liveness_Ratio():
+    #Do not remove the following code statment
+    df=Irrelevant_Track_name()
 
+    #WRITE YOUR CODE HERE
+    
+    df["EnergyLiveness"]= df["Energy"] / df["Liveness"]
+    #return dataframe
+    return df
 
-#TASK 11
-#follow the instruction in the Task 11 description and complete the task as per it.
+#Task 9: change the datatype of 'views' to float for further use
+def change_the_datatype():
+    #Do not remove the following code statment
+    df=Energy_to_liveness_Ratio()
 
-#check if mysql table is created using "cleaned_apps_db.csv" and "cleaned_reviews_db.csv"
-#Use this final dataset and upload it on the provided database for performing analysis in  MySQL
-#To run this task click on the terminal and click on the run project
+    #WRITE YOUR CODE HERE
+    df["Views"].astype("float")
+    #return dataframe
+    return df
 
+#Task 10: compare the views and stream columns to infer
+# that the song track was more played on which platform, youtube or Spotify.
+# Create a column named most_playedon which will have two values.
+# Spotify and Youtube,If a song track is most played on youtube then
+# the most_played on column will have youtube as the value for that particular song
+def compare_the_views():
+    #Do not remove the following code statment
+    df=change_the_datatype()
+    print(df.head())
+    #WRITE YOUR CODE HERE
+    def most_played(row):
+        if (row["Stream"]) > (row["Views"]):
+            return "Spotify"
+        else:
+            return "Youtube"
+    df["most_playedon"] = df.apply(most_played,axis=1)
+    #return dataframe
+    return df
 
+#Task 11: export the cleaned dataset to CSV to "cleaned_dataset.csv"
+def export_the_cleaned_dataset():
+    #Do not remove the following code statment
+    df=compare_the_views()
+    
+    #WRITE YOUR CODE HERE
+    #create csv file "cleaned_dataset.csv" using dataframe
+    
+    df.to_csv('cleaned_dataset.csv', index=False)
 
-
+#TASK 12
 
 
